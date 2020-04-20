@@ -1,0 +1,17 @@
+termius
+filezilla
+
+
+hostname
+default port:
+1212
+21
+22
+
+siteproofs.net
+siteproofs.com
+
+homepage url in package.json
+npm run build
+
+

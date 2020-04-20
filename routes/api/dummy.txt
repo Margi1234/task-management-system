@@ -1,0 +1,64 @@
+app.post("/register", (req, res) => {
+  const { errors, isValid } = validateRegisterInput(req.body);
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+  let email = req.body.email;
+  let password = req.body.password;
+  let name = req.body.name;
+  var data = { name: name, email: email, password: password };
+  if (!data) {
+    return res
+      .status(400)
+      .send({ error: true, message: "Please provide email" });
+  }
+  //finding if the email is already registered or not
+  conn.query("SELECT COUNT(*) FROM users where email=?", email, function (
+    error,
+    results,
+    fields
+  ) {
+    if (error) throw error;
+    else {
+      res.send({ error: false, data: results, message: "users list." });
+      var count = results.length;
+      if (count > 0) {
+        return res.status(400).json({ email: "Email already exists" });
+      }
+      bcrypt.genSalt(10, (err, salt) => {
+        bcrypt.hash(req.body.password, salt, (err, hash) => {
+          if (err) throw err;
+          else {
+            let email = req.body.email;
+            let pwd = hash;
+            let name = req.body.name;
+            var data = { email: email, password: pwd, name: name };
+            conn.query("INSERT INTO users SET ? ", data, function (
+              error,
+              results,
+              fields
+            ) {
+              if (error) throw error;
+              return res.send({
+                error: false,
+                data: results,
+                message: "New user has been created successfully.",
+              });
+            });
+          }
+        });
+      });
+      //     conn.query("INSERT INTO users SET ? ", data, function (
+      //       error,
+      //       results,
+      //       fields
+      //     ) {
+      //       if (error) throw error;
+      //       return res.send({
+      //         error: false,
+      //         data: results,
+      //         message: "New user has been created successfully.",
+      //       });
+      //     });
+    }
+  });});
