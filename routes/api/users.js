@@ -323,5 +323,37 @@ router.put("/updateUser", function (req, res) {
     }
   });
 });
+router.get("/searchFilter/:name/:email/:type/:status", function (req, res) {
+  // console.log(req.body);
+  var email = req.params.email;
+  email = email.substring(1);
+  var name = req.params.name;
+  name = name.substring(1);
+  var type = req.params.type;
+  type = type.substring(1);
+  var status = req.params.status;
+  status = status.substring(1);
+  var sql = `SELECT * FROM adminusers WHERE email LIKE "%${email}%" AND name LIKE "%${name}%" AND type LIKE "%${type}%" AND status LIKE "%${status}%"`;
+  // console.log("query is ", sql);
+  conn.query(sql, function (error, results, fields) {
+    if (error) throw error;
+    else {
+      console.log(results);
+      res.send(results);
+    }
+  });
+});
 
+router.post("/sortUsers", function (req, res) {
+  console.log("in sorting api");
+  console.log(req.body);
+  var sql = `SELECT * FROM adminusers ORDER BY ${req.body.ordBy} ${req.body.ord}`;
+  conn.query(sql, function (error, results, fields) {
+    if (error) throw error;
+    else {
+      console.log(results);
+      res.send(results);
+    }
+  });
+});
 module.exports = router;
