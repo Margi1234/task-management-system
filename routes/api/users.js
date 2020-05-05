@@ -281,7 +281,50 @@ router.post("/users/add", function (req, res) {
     });
   });
 });
-
+router.post("/employees/add", function (req, res) {
+  console.log("in adding employee");
+  console.log(req.body);
+  let empid = req.body.empid;
+  let name = req.body.name;
+  let email = req.body.email;
+  let gender = req.body.gender;
+  let contact = req.body.contact;
+  let officeemail = req.body.officeemail;
+  let officeno = req.body.office;
+  let designation = req.body.designation;
+  let dob = req.body.date;
+  let permanentaddress = req.body.permanentaddress;
+  let currentaddress = req.body.currentaddress;
+  let doj = req.body.joiningdate;
+  let skypename = req.body.skypeusername;
+  var data = {
+    empid: empid,
+    name: name,
+    email: email,
+    gender: gender,
+    dob: dob,
+    permanentaddress: permanentaddress,
+    currentaddress: currentaddress,
+    contact: contact,
+    offficeemail: officeemail,
+    officeno: officeno,
+    designation: designation,
+    doj: doj,
+    skypename: skypename,
+  };
+  conn.query("INSERT INTO employeetable SET ? ", data, function (
+    error,
+    results,
+    fields
+  ) {
+    if (error) throw error;
+    return res.send({
+      error: false,
+      data: results,
+      message: "New admin user has been created successfully.",
+    });
+  });
+});
 router.get("/getAdminUserData", function (req, res) {
   conn.query("SELECT * FROM adminusers", function (error, results, fields) {
     if (error) throw error;
@@ -291,12 +334,33 @@ router.get("/getAdminUserData", function (req, res) {
     }
   });
 });
-
+router.get("/getEmployeeData", function (req, res) {
+  conn.query("SELECT * FROM employeetable", function (error, results, fields) {
+    if (error) throw error;
+    else {
+      // console.log(results);
+      res.send(results);
+    }
+  });
+});
 router.delete("/deleteAdminUser", function (req, res) {
   var id = req.body.id;
   var data = { id: id };
   console.log(id);
   var sql = `DELETE FROM adminusers WHERE id=${id}`;
+  conn.query(sql, function (error, results, fields) {
+    if (error) throw error;
+    else {
+      console.log(results);
+      res.send(results);
+    }
+  });
+});
+router.delete("/deleteEmployee", function (req, res) {
+  var id = req.body.id;
+  var data = { id: id };
+  console.log(id);
+  var sql = `DELETE FROM employeetable WHERE id=${id}`;
   conn.query(sql, function (error, results, fields) {
     if (error) throw error;
     else {
@@ -323,18 +387,26 @@ router.put("/updateUser", function (req, res) {
     }
   });
 });
-router.get("/searchFilter/:name/:email/:type/:status", function (req, res) {
-  // console.log(req.body);
-  var email = req.params.email;
-  email = email.substring(1);
-  var name = req.params.name;
-  name = name.substring(1);
-  var type = req.params.type;
-  type = type.substring(1);
-  var status = req.params.status;
-  status = status.substring(1);
-  var sql = `SELECT * FROM adminusers WHERE email LIKE "%${email}%" AND name LIKE "%${name}%" AND type LIKE "%${type}%" AND status LIKE "%${status}%"`;
-  // console.log("query is ", sql);
+router.put("/updateEmployee", function (req, res) {
+  console.log("in updating admin user");
+  console.log(req.body);
+  var id = req.body.id;
+  var empid = req.body.empid;
+  var name = req.body.name;
+  var email = req.body.email;
+  var date = req.body.date;
+  var gender = req.body.gender;
+  var permanentaddress = req.body.permanentaddress;
+  var currentaddress = req.body.currentaddress;
+  var contact = req.body.contact;
+  var officeemail = req.body.officeemail;
+  var designation = req.body.designation;
+  var joiningdate = req.body.joiningdate;
+  var skypeusername = req.body.skypeusername;
+  var office = req.body.office;
+  // var data = { name: name, email: email, type: type, status: status };
+  // console.log(data);
+  var sql = `UPDATE employeetable SET empid = "${empid}", name = "${name}", email = "${email}", gender = "${gender}", dob = "${date}", permanentaddress = "${permanentaddress}", currentaddress = "${currentaddress}", contact = "${contact}",offficeemail = "${officeemail}", officeno = "${office}", designation = "${designation}", skypename = "${skypeusername}", doj = "${joiningdate}" WHERE id ="${id}"`;
   conn.query(sql, function (error, results, fields) {
     if (error) throw error;
     else {
@@ -343,14 +415,61 @@ router.get("/searchFilter/:name/:email/:type/:status", function (req, res) {
     }
   });
 });
+// router.post("/searchFilter/:name/:email/:type/:status", function (req, res) {
+//   // console.log(req.body);
+//   var email = req.params.email;
+//   email = email.substring(1);
+//   var name = req.params.name;
+//   name = name.substring(1);
+//   var type = req.params.type;
+//   type = type.substring(1);
+//   var status = req.params.status;
+//   status = status.substring(1);
+//   var sql = `SELECT * FROM adminusers WHERE email LIKE "%${email}%" AND name LIKE "%${name}%" AND type LIKE "%${type}%" AND status LIKE "%${status}%"`;
+//   // console.log("query is ", sql);
+//   conn.query(sql, function (error, results, fields) {
+//     if (error) throw error;
+//     else {
+//       // console.log(results);
+//       res.send(results);
+//     }
+//   });
+// });
 
 router.post("/sortUsers", function (req, res) {
   console.log("in sorting api");
   console.log(req.body);
-  var sql = `SELECT * FROM adminusers ORDER BY ${req.body.ordBy} ${req.body.ord}`;
+  var rowsPerPage = req.body.rows;
+  var page = req.body.page;
+  var sql = `SELECT * FROM adminusers WHERE name LIKE "%${req.body.fil.name}%" AND email LIKE "%${req.body.fil.email}%" AND type LIKE "%${req.body.fil.type}%" AND status LIKE "${req.body.fil.status}%" ORDER BY ${req.body.ordBy} ${req.body.ord}`;
   conn.query(sql, function (error, results, fields) {
     if (error) throw error;
     else {
+      //
+      results = results.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
+      console.log(results);
+      res.send(results);
+    }
+  });
+});
+
+router.post("/sortEmployees", function (req, res) {
+  console.log("in sorting api");
+  console.log(req.body);
+  var rowsPerPage = req.body.rows;
+  var page = req.body.page;
+  var sql = `SELECT * FROM employeetable WHERE name LIKE "%${req.body.fil.name}%" AND empid LIKE "%${req.body.fil.empid}%" AND permanentaddress LIKE "%${req.body.fil.permanentaddress}%" AND currentaddress LIKE "%${req.body.fil.currentaddress}%" AND contact LIKE "%${req.body.fil.contact}%" AND officeno LIKE "${req.body.fil.office}%" AND designation LIKE "${req.body.fil.designation}%" ORDER BY ${req.body.ordBy} ${req.body.ord}`;
+  conn.query(sql, function (error, results, fields) {
+    if (error) throw error;
+    else {
+      //
+      results = results.slice(
+        page * rowsPerPage,
+        page * rowsPerPage + rowsPerPage
+      );
       console.log(results);
       res.send(results);
     }
